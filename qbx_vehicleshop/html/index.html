@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="hidden">
+    <!-- área livre para girar/zoom com o mouse -->
+    <div id="drag"></div>
+
+    <!-- topo esquerdo: veículo selecionado -->
+    <section class="top-left">
+        <div class="brand" id="vBrand"></div>
+        <h1 id="vName">—</h1>
+        <div class="seats" id="vSeats"></div>
+        <div class="score">
+            <span class="cls" id="vClass">-</span>
+            <span class="num" id="vScore">0</span><span class="max">/1000</span>
+            <div class="scorebar"><i id="vScoreBar"></i></div>
+        </div>
+        <div class="stats">
+            <div class="stat"><span>Velocidade</span><div class="bar"><i id="sSpeed"></i></div></div>
+            <div class="stat"><span>Aceleração</span><div class="bar"><i id="sAccel"></i></div></div>
+            <div class="stat"><span>Frenagem</span><div class="bar"><i id="sBrake"></i></div></div>
+            <div class="stat"><span>Tração</span><div class="bar"><i id="sTraction"></i></div></div>
+            <div class="topspeed"><b id="vTop">0</b> km/h</div>
+        </div>
+    </section>
+
+    <!-- topo direito: dinheiro -->
+    <section class="top-right">
+        <div class="money"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z M7 12a5 5 0 0 0 10 0 5 5 0 0 0-10 0" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="mCash">R$ 0</span></div>
+        <div class="money"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="mBank">R$ 0</span></div>
+        <button class="close" id="btnClose" title="Fechar (ESC)">✕</button>
+    </section>
+
+    <!-- parte de baixo -->
+    <section class="bottom">
+        <div class="row head">
+            <h2 id="shopLabel">Showroom</h2>
+            <div class="search"><input id="search" placeholder="Buscar veículo..." autocomplete="off"></div>
+            <div class="colors" id="colors"></div>
+        </div>
+
+        <div class="row tabs-row">
+            <span class="key">Q</span>
+            <div class="tabs" id="tabs"></div>
+            <span class="key">E</span>
+
+            <div class="actions">
+                <span class="stock" id="vStock"></span>
+                <button class="btn ghost" id="btnTest"><span class="key">T</span>TEST DRIVE</button>
+                <button class="btn ghost" id="btnFinance"><span class="key">F</span>FINANCIAR</button>
+                <button class="btn primary" id="btnBuy"><span class="key dark">ENTER</span><b id="buyLabel">COMPRAR</b></button>
+            </div>
+        </div>
+
+        <div class="cards" id="cards"></div>
+
+        <div class="hints">
+            <span><span class="key">←</span><span class="key">→</span> navegar</span>
+            <span><span class="key">MOUSE</span> girar / zoom</span>
+            <span><span class="key">C</span> câmera</span>
+            <span><span class="key">ENTER</span> comprar</span>
+            <span><span class="key">ESC</span> sair</span>
+        </div>
+    </section>
+
+    <!-- modal de confirmação -->
+    <div class="modal hidden" id="modal">
+        <div class="box">
+            <h3 id="mTitle">Confirmar compra</h3>
+            <div class="mveh"><span id="mVeh"></span><b id="mPrice"></b></div>
+
+            <label class="field hidden" id="fPlayer"><span>ID do cliente</span>
+                <input type="number" id="iPlayer" min="1" placeholder="Ex.: 12">
+            </label>
+
+            <div id="financeFields" class="hidden">
+                <label class="field"><span>Entrada (mín. <span id="minDownTxt"></span>)</span>
+                    <input type="number" id="iDown">
+                </label>
+                <label class="field"><span>Parcelas: <span id="paysTxt"></span></span>
+                    <input type="range" id="iPays" min="2" value="2">
+                </label>
+                <div class="summary" id="financeSummary"></div>
+            </div>
+
+            <div class="mbtns">
+                <button class="btn ghost" id="mCancel">CANCELAR</button>
+                <button class="btn primary" id="mConfirm"><b>CONFIRMAR</b></button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- cronômetro do test drive (fica fora do painel) -->
+<div id="td" class="td hidden">
+    <div class="ring">
+        <svg viewBox="0 0 44 44"><circle class="bg" cx="22" cy="22" r="19"/><circle class="fg" id="tdRing" cx="22" cy="22" r="19"/></svg>
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6M12 2v3"/></svg>
+    </div>
+    <div class="txt">
+        <small>TEST DRIVE<span id="tdVeh"></span></small>
+        <b id="tdTime">00:00</b>
+    </div>
+    <div class="tdbar"><i id="tdBar"></i></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
