@@ -22,7 +22,7 @@ Sistema de pesca com zonas de dificuldade progressiva, varas e iscas de níveis 
 
 | Recurso | Obrigatório | Observação |
 |---|---|---|
-| `ox_lib` | Sim | Callbacks, skill check, menus de contexto, zonas, keybinds e locale |
+| `ox_lib` | Sim | Callbacks, menus de contexto, zonas, keybinds e locale (o skill check foi trocado pelo minigame próprio) |
 | `oxmysql` | Sim | Carregado nos `server_scripts` |
 | `qb-core` **ou** `es_extended` | Sim | Framework. Detectado em runtime pelos arquivos de `framework/` |
 | `cw-rep` | Sim | **Nesta fork o nível de pesca vem do `cw-rep`**, não de tabela própria. `fetchSkills`, `updateSkill`, `getCurrentSkill` e `getCurrentLevel` são chamados sem checagem de existência — sem o `cw-rep` o recurso quebra |
@@ -73,7 +73,30 @@ Arquivos: `config/config.lua` (compartilhado) e `config/sv_config.lua` (servidor
 |---|---|---|---|
 | `price` | number ou `{min, max}` | Sim | Preço de venda. Se for faixa, é sorteado na hora da venda |
 | `chance` | number | Sim | Peso relativo do sorteio dentro da lista de peixes da zona |
-| `skillcheck` | array | Sim | Dificuldades do skill check do `ox_lib`: `easy`, `medium`, `hard` |
+| `minigame` | table | Não | Como o peixe se comporta no minigame: `{ difficulty, behavior, color }`. Ver [Minigame](#minigame-configminigame) |
+| `skillcheck` | array | Não | Só é usado se o peixe não tiver `minigame`: a dificuldade é calculada somando `easy` = 1, `medium` = 2, `hard` = 3 |
+
+#### `minigame` de cada peixe
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `difficulty` | number | De 1 a 100, igual ao Stardew Valley. Quanto maior, mais rápido e mais vezes o peixe muda de direção |
+| `behavior` | string | Jeito de nadar: `mixed` (de tudo um pouco), `dart` (dá trancos), `smooth` (suave), `sinker` (puxa pro fundo), `floater` (puxa pra cima) |
+| `color` | string | Cor do peixinho no minigame, em hex (`'#e8865a'`) |
+
+### Minigame (`Config.minigame`)
+
+| Campo | Padrão | Descrição |
+|---|---|---|
+| `barSize` | `{ basic_rod = 96, graphite_rod = 120, titanium_rod = 150 }` | Altura da barra verde por vara. O trilho inteiro tem 568, então vara melhor = barra maior = mais fácil |
+| `defaultBarSize` | `96` | Altura usada se a vara não estiver em `barSize` |
+| `startProgress` | `0.3` | Progresso inicial (0 a 1) |
+| `gainRate` | `0.002` | Quanto o progresso enche por tick (60 por segundo) com o peixe dentro da barra |
+| `lossRate` | `0.003` | Quanto esvazia por tick com o peixe fora |
+| `scale` | `3.6` | Tamanho na tela (o desenho tem 46x164 pixels e é multiplicado por isso) |
+| `position` | `{ x = 62, y = 50 }` | Posição na tela, em % |
+| `sound` | `true` | Sons do molinete, de vitória e de derrota |
+| `hint` | `true` | Plaquinha com as teclas embaixo do minigame |
 
 ### Varas (`Config.fishingRods`)
 
@@ -157,6 +180,8 @@ Arquivo de wrappers, não de opções: notificação, TextUI, progressbar, `SetV
 
 Ambas são registradas via `lib.addKeybind` e podem ser remapeadas pelo jogador em Configurações > Teclas > FiveM.
 
+Durante o minigame, **clique esquerdo**, **E** ou **espaço** (segurados) sobem a barra verde. Essas teclas ficam bloqueadas pro resto do jogo enquanto o minigame está aberto.
+
 ---
 
 ## Como pescar
@@ -165,7 +190,7 @@ Ambas são registradas via `lib.addKeybind` e podem ser remapeadas pelo jogador 
 2. Fique de frente para a água, em pé — não funciona nadando nem dentro de veículo. O recurso testa se há água à frente com `TestProbeAgainstWater`.
 3. **Use a vara pelo inventário.** Não existe comando de pesca; o gatilho é o item usável.
 4. A isca mais cara do inventário é consumida e começa a espera (faixa da zona, dividida pelo `waitDivisor` da isca).
-5. Quando o peixe morder, complete o skill check. Segurar `E` a qualquer momento cancela a pescaria.
+5. Quando o peixe morder, abre o minigame: segure clique esquerdo, `E` ou espaço pra subir a barra verde e mantenha o peixe dentro dela até a barra de progresso encher (veja o `README.md`). Enquanto espera a mordida, segurar `E` cancela a pescaria.
 6. Sucesso: o peixe entra no inventário e o XP de `fishing` sobe. Falha: nada é ganho e a vara pode quebrar conforme o `breakChance` dela.
 7. Venda os peixes no NPC pescador, na opção "Vender peixes".
 
@@ -253,7 +278,8 @@ As mensagens de entrada e saída das zonas (`Config.fishingZones[].message`) e o
 ```
 lunar_fishing/
 ├── client/
-│   ├── main.lua          — zonas, blips, teste de água e o minigame de pesca em si
+│   ├── main.lua          — zonas, blips, teste de água e a pescaria em si
+│   ├── minigame.lua      — abre o minigame (NUI), lê as teclas e devolve o resultado
 │   ├── ped.lua           — NPC pescador: menu de comprar varas/iscas e vender peixes
 │   ├── rent.lua          — NPC locador: menu de aluguel, spawn e devolução do barco
 │   ├── level.lua         — cache do nível de fishing no cliente
@@ -277,6 +303,11 @@ lunar_fishing/
 │   ├── en.json
 │   ├── de.json
 │   └── pt-br.json
+├── html/
+│   ├── index.html        — minigame estilo Stardew Valley (abra com ?test pra testar no navegador)
+│   ├── style.css
+│   └── script.js         — física, desenho em pixel art e sons
+├── docs/                 — imagens do README
 ├── install/
 │   ├── OX.md             — itens para o ox_inventory
 │   ├── QBCore.md         — itens para o qb-core
