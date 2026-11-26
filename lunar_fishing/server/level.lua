@@ -29,7 +29,7 @@ local levels = {}
 -- end
 
 -- lib.cron.new('*/10 * * * *', save)
-AddEventHandler('txAdmin:events:serverShuttingDown', save)
+-- AddEventHandler('txAdmin:events:serverShuttingDown', save)
 
 AddEventHandler('txAdmin:events:scheduledRestart', function(eventData)
     if eventData.secondsRemaining ~= 60 then return end
@@ -49,23 +49,38 @@ end)
 --     MySQL.insert.await('INSERT INTO lunar_fishing (user_identifier, xp) VALUES(?, ?)', { identifier, levels[identifier] })
 -- end
 
+---@param source integer
+---@return number xp
+function GetPlayerFishingXp(source)
+    local skills = exports["cw-rep"]:fetchSkills(source)
+
+    return tonumber(skills and skills.fishing) or 0
+end
+
+--- Nível "quebrado" (ex.: 1.4 = nível 1, 40% do caminho pro 2), que é o formato que o client usa.
+---@param xp number
+---@return number
+function FishingLevelFromXp(xp)
+    local level, from, to = Config.getFishingLevel(xp)
+
+    if not to then return level end
+
+    return level + (xp - from) / (to - from)
+end
+
+---@param source integer
+---@return integer
+function GetPlayerFishingLevel(source)
+    return (Config.getFishingLevel(GetPlayerFishingXp(source)))
+end
+
 lib.callback.register('lunar_fishing:getLevel', function(source)
     local player = Framework.getPlayerFromId(source)
 
     if not player then return end
 
-    local identifier = player:getIdentifier()
-
-    -- if not levels[identifier] then
-    --     createPlayer(identifier)
-    -- end
-
-    -- return levels[identifier]
-
-    local playerSkills = exports["cw-rep"]:fetchSkills(source)
-    -- print('getLevel getLevel getLevel',source, ' fishing skills:',playerSkills.fishing)
-
-    return playerSkills.fishing
+    -- O cw-rep guarda XP; o nível sai da mesma tabela dele (Config.getFishingLevel)
+    return FishingLevelFromXp(GetPlayerFishingXp(source))
 end)
 
 ---@param player Player

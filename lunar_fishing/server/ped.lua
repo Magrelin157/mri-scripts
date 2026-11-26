@@ -41,12 +41,7 @@ lib.callback.register('lunar_fishing:buy', function(source, data, amount)
 
     local player = Framework.getPlayerFromId(source)
 
-    local playerSkills = exports["cw-rep"]:fetchSkills(source)
-    -- print('Player with source',source, ' fishing skills:',playerSkills.fishing)
-
-    if not player
-    -- or GetPlayerLevel(player) < item.minLevel then return end
-    or playerSkills.fishing < item.minLevel then return end
+    if not player or GetPlayerFishingLevel(source) < item.minLevel then return end
 
     if player:getAccountMoney(Config.ped.buyAccount) >= price then
         SetTimeout(3000, function()

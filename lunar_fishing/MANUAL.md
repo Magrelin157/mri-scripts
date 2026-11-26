@@ -64,7 +64,7 @@ Arquivos: `config/config.lua` (compartilhado) e `config/sv_config.lua` (servidor
 
 | Campo | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `Config.progressPerCatch` | number | Sim | XP de `fishing` enviado ao `cw-rep` a cada peixe capturado. Padrão: `5` |
+| `Config.progressPerCatch` | number | Sim | XP de `fishing` enviado ao `cw-rep` a cada peixe capturado. Padrão: `1` |
 | `SvConfig.Webhook` | string | Não | Webhook do Discord para log de capturas. Enquanto for `'WEBHOOK_HERE'`, nada é enviado |
 
 ### Peixes (`Config.fish`)
@@ -84,12 +84,31 @@ Arquivos: `config/config.lua` (compartilhado) e `config/sv_config.lua` (servidor
 | `behavior` | string | Jeito de nadar: `mixed` (de tudo um pouco), `dart` (dá trancos), `smooth` (suave), `sinker` (puxa pro fundo), `floater` (puxa pra cima) |
 | `color` | string | Cor do peixinho no minigame, em hex (`'#e8865a'`) |
 
+### Painel do pescador (`Config.shop`)
+
+| Campo | Padrão | Descrição |
+|---|---|---|
+| `enabled` | `true` | `false` volta pro menu de contexto antigo do ox_lib |
+| `title` | `'Corporação Marítima'` | Título do painel |
+| `outsideLabel` | `'Qualquer água'` | Nome da "zona" de fora no painel |
+| `maxAmount` | `100` | Quantidade máxima por compra |
+
+Cada zona em `Config.fishingZones` tem um `label`, que é o nome mostrado no painel.
+
+Callbacks do painel (servidor, `server/shop.lua`): `lunar_fishing:shopData`, `lunar_fishing:shopBuy` (`{ type, index, amount }`) e `lunar_fishing:shopSell` (`{ [peixe] = quantidade }`). Todos validam nível, dinheiro e quantidade.
+
+### Níveis (`Config.levels` e `Config.progressPerCatch`)
+
+O XP fica na skill `fishing` do `cw-rep`. `Config.getFishingLevel(xp)` devolve `nivel, xpDoNivel, xpDoProximo` usando a mesma tabela exponencial do `cw-rep` (`baseExp = 10`, `scaleFactor = 1.5`, `levelCount = 30`): nível 1 = 10 XP, 2 = 25, 3 = 48, 4 = 82, 5 = 133. `Config.progressPerCatch` (padrão `1`) é o XP ganho por peixe.
+
+No servidor também existem `GetPlayerFishingXp(source)`, `GetPlayerFishingLevel(source)` e `FishingLevelFromXp(xp)`.
+
 ### Minigame (`Config.minigame`)
 
 | Campo | Padrão | Descrição |
 |---|---|---|
-| `barSize` | `{ basic_rod = 96, graphite_rod = 120, titanium_rod = 150 }` | Altura da barra verde por vara. O trilho inteiro tem 568, então vara melhor = barra maior = mais fácil |
-| `defaultBarSize` | `96` | Altura usada se a vara não estiver em `barSize` |
+| `barSize` | `{ basic_rod = 104, graphite_rod = 120, titanium_rod = 136 }` | Altura da barra verde por vara. O trilho inteiro tem 568, então vara melhor = barra maior = mais fácil |
+| `defaultBarSize` | `104` | Altura usada se a vara não estiver em `barSize` |
 | `startProgress` | `0.3` | Progresso inicial (0 a 1) |
 | `gainRate` | `0.002` | Quanto o progresso enche por tick (60 por segundo) com o peixe dentro da barra |
 | `lossRate` | `0.003` | Quanto esvazia por tick com o peixe fora |
@@ -186,13 +205,13 @@ Durante o minigame, **clique esquerdo**, **E** ou **espaço** (segurados) sobem 
 
 ## Como pescar
 
-1. Compre uma vara e iscas com o NPC pescador (opção "Comprar varas" / "Comprar iscas" do menu). Varas e iscas de nível superior ficam bloqueadas até o nível de `fishing` correspondente.
+1. Compre uma vara e iscas no painel do NPC pescador (abas "Varas" e "Iscas"). Varas e iscas de nível superior ficam bloqueadas até o nível de `fishing` correspondente.
 2. Fique de frente para a água, em pé — não funciona nadando nem dentro de veículo. O recurso testa se há água à frente com `TestProbeAgainstWater`.
 3. **Use a vara pelo inventário.** Não existe comando de pesca; o gatilho é o item usável.
 4. A isca mais cara do inventário é consumida e começa a espera (faixa da zona, dividida pelo `waitDivisor` da isca).
 5. Quando o peixe morder, abre o minigame: segure clique esquerdo, `E` ou espaço pra subir a barra verde e mantenha o peixe dentro dela até a barra de progresso encher (veja o `README.md`). Enquanto espera a mordida, segurar `E` cancela a pescaria.
 6. Sucesso: o peixe entra no inventário e o XP de `fishing` sobe. Falha: nada é ganho e a vara pode quebrar conforme o `breakChance` dela.
-7. Venda os peixes no NPC pescador, na opção "Vender peixes".
+7. Venda os peixes no painel do NPC pescador, na aba "Vender".
 
 ---
 
@@ -203,8 +222,9 @@ Durante o minigame, **clique esquerdo**, **E** ou **espaço** (segurados) sobem 
 O nível de pesca é inteiramente delegado ao `cw-rep`, na skill `fishing`:
 
 - a cada peixe capturado, o servidor chama `exports["cw-rep"]:updateSkill(source, 'fishing', Config.progressPerCatch)`;
-- o nível usado para liberar zonas, varas e iscas vem de `exports["cw-rep"]:fetchSkills(source).fishing`;
-- o menu do NPC mostra nível e progresso via `getCurrentSkill` e `getCurrentLevel`.
+- o `cw-rep` guarda **XP** (`exports["cw-rep"]:fetchSkills(source).fishing`); o nível usado para liberar zonas, varas e iscas é calculado com `Config.getFishingLevel(xp)`, que replica a tabela de níveis do `cw-rep`;
+- depois de cada peixe, o servidor manda o nível novo pro cliente (`lunar_fishing:updateLevel`) e avisa quando o jogador sobe de nível;
+- o painel do NPC mostra nível e XP a partir do mesmo cálculo.
 
 O sistema de XP original (tabela `lunar_fishing` no MySQL) foi desativado — o código está no arquivo, comentado.
 
@@ -280,6 +300,7 @@ lunar_fishing/
 ├── client/
 │   ├── main.lua          — zonas, blips, teste de água e a pescaria em si
 │   ├── minigame.lua      — abre o minigame (NUI), lê as teclas e devolve o resultado
+│   ├── shop.lua          — abre o painel do pescador e repassa compra/venda pro servidor
 │   ├── ped.lua           — NPC pescador: menu de comprar varas/iscas e vender peixes
 │   ├── rent.lua          — NPC locador: menu de aluguel, spawn e devolução do barco
 │   ├── level.lua         — cache do nível de fishing no cliente
@@ -306,7 +327,9 @@ lunar_fishing/
 ├── html/
 │   ├── index.html        — minigame estilo Stardew Valley (abra com ?test pra testar no navegador)
 │   ├── style.css
-│   └── script.js         — física, desenho em pixel art e sons
+│   ├── script.js         — física, desenho em pixel art e sons
+│   ├── shop.css
+│   └── shop.js           — painel do pescador (abra com ?shop pra testar no navegador)
 ├── docs/                 — imagens do README
 ├── install/
 │   ├── OX.md             — itens para o ox_inventory
