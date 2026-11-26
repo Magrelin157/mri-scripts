@@ -153,19 +153,19 @@ local function buyBaits()
 end
 
 local function open()
-    local level, progress = GetCurrentLevel(), GetCurrentLevelProgress() * 100
-    local xp = exports["cw-rep"]:getCurrentSkill('fishing')
-    local level = exports["cw-rep"]:getCurrentLevel('fishing')
-        
+    local xp = tonumber(exports["cw-rep"]:getCurrentSkill('fishing')) or 0
+    local level, from, to = Config.getFishingLevel(xp)
+    local progress = to and math.floor((xp - from) / (to - from) * 100) or 100
+
     lib.registerContext({
         id = 'fisherman',
         title = locale('fisherman'),
         options = {
             {
                 title = locale('level', level),
-                description = locale('level_desc', (100*(level+1))-xp),
+                description = to and locale('level_desc', to - xp) or locale('max_level'),
                 icon = 'chart-simple',
-                progress = xp-(100*level),
+                progress = progress,
                 colorScheme = 'lime'
             },
             {
@@ -201,7 +201,13 @@ local function createPeds()
             {
                 label = locale('open_fisherman'),
                 icon = 'fish',
-                onSelect = open
+                onSelect = function()
+                    if Config.shop and Config.shop.enabled ~= false then
+                        OpenFishingShop()
+                    else
+                        open()
+                    end
+                end
             }
         })
         Utils.createBlip(coords, Config.ped.blip)

@@ -104,9 +104,17 @@ for _, rod in ipairs(Config.fishingRods) do
 
         if success then
             player:addItem(fishName, 1)
-            -- AddPlayerLevel(player, Config.progressPerCatch)
+            local oldXp = GetPlayerFishingXp(source)
+            local newXp = oldXp + Config.progressPerCatch
+
             exports["cw-rep"]:updateSkill(source, 'fishing', Config.progressPerCatch)
-            print("Log:", source, player, Config.progressPerCatch)
+
+            -- Atualiza o nível no client (zonas/blips) e avisa quando sobe de nível
+            TriggerClientEvent('lunar_fishing:updateLevel', source, FishingLevelFromXp(newXp))
+
+            if Config.getFishingLevel(newXp) > Config.getFishingLevel(oldXp) then
+                TriggerClientEvent('lunar_fishing:showNotification', source, locale('unlocked_level'), 'success')
+            end
             Utils.logToDiscord(source, player, ('Caught a %s.'):format(Utils.getItemLabel(fishName)))
         elseif math.random(100) <= rod.breakChance then
             player:removeItem(rod.name, 1)

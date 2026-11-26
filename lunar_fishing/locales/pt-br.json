@@ -40,5 +40,6 @@
     "bait_price": "Clique para comprar esta isca por R$ %s.",
     "return_boat": "[%s] - Retornar barco",
     "return_content": "Você realmente deseja devolver este barco? \nO aluguel lhe pagará R$ %s em troca.",
-    "returned_boat": "Você devolveu o barco com sucesso."
+    "returned_boat": "Você devolveu o barco com sucesso.",
+    "max_level": "Você chegou no nível máximo."
 }

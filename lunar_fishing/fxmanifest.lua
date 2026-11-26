@@ -13,7 +13,9 @@ files {
     'locales/*.json',
     'html/index.html',
     'html/style.css',
-    'html/script.js'
+    'html/script.js',
+    'html/shop.css',
+    'html/shop.js'
 }
 
 shared_scripts {

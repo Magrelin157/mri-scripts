@@ -1,0 +1,533 @@
+/* Painel do pescador — mesmo visual do minigame (madeira + papel, estilo Stardew Valley) */
+
+:root {
+    --wood-darker: #3b2210;
+    --wood-dark: #5c3417;
+    --wood: #8a5224;
+    --wood-mid: #b8743a;
+    --wood-light: #e0a25e;
+    --paper: #f6e3bd;
+    --paper-2: #f0d7a6;
+    --paper-3: #e6c58a;
+    --ink: #3b2412;
+    --ink-soft: #7a4f2a;
+    --green: #5fb94a;
+    --green-dark: #2f7f2a;
+    --red: #d64a3a;
+    --gold: #f2c14e;
+    --blue: #4f8fd6;
+}
+
+#shop-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Trebuchet MS', 'Verdana', sans-serif;
+    color: var(--ink);
+    transition: opacity 0.15s;
+}
+
+#shop-wrap.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#shop {
+    position: relative;
+    width: 900px;
+    height: 580px;
+    display: flex;
+    flex-direction: column;
+    background: var(--wood);
+    border: 5px solid var(--wood-darker);
+    border-radius: 8px;
+    box-shadow:
+        inset 0 0 0 3px var(--wood-mid),
+        inset 0 0 0 6px var(--wood-dark),
+        0 18px 40px rgba(0, 0, 0, 0.55);
+    padding: 10px;
+    box-sizing: border-box;
+    transform: scale(var(--shop-scale, 1));
+    transition: transform 0.18s cubic-bezier(.2, 1.4, .5, 1);
+}
+
+#shop-wrap.hidden #shop {
+    transform: scale(calc(var(--shop-scale, 1) * 0.92));
+}
+
+/* ---------- Cabeçalho (tábua) ---------- */
+.shop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background:
+        repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 7px),
+        linear-gradient(180deg, var(--wood-light), var(--wood-mid));
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 3px 0 var(--wood-darker);
+}
+
+.shop-title { display: flex; align-items: center; gap: 12px; }
+
+.shop-title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff4d9;
+    letter-spacing: 0.5px;
+    text-shadow: 2px 2px 0 var(--wood-darker), -1px -1px 0 var(--wood-darker), 1px -1px 0 var(--wood-darker), -1px 1px 0 var(--wood-darker);
+}
+
+.shop-title p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--wood-darker);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.npc-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 3px solid var(--wood-darker);
+    box-shadow: inset 0 -3px 0 var(--paper-3);
+}
+
+.npc-icon svg { width: 26px; height: 26px; }
+
+.shop-close {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--wood-darker);
+    border-radius: 6px;
+    background: var(--red);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.shop-close:hover { filter: brightness(1.1); }
+.shop-close:active { transform: translateY(2px); box-shadow: none; }
+
+/* ---------- Corpo ---------- */
+.shop-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 10px;
+}
+
+.shop-side {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.side-card {
+    background: var(--paper);
+    border: 3px solid var(--wood-dark);
+    border-radius: 6px;
+    box-shadow: inset 0 -3px 0 var(--paper-3), inset 0 2px 0 #fff4d9;
+    padding: 10px 12px;
+}
+
+.muted { color: var(--ink-soft); }
+
+/* Nível */
+.level-card { display: flex; gap: 12px; align-items: center; }
+
+.level-badge {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 35% 30%, #ffe9a6, var(--gold) 60%, #c8902a);
+    border: 3px solid var(--wood-darker);
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.level-badge small { font-size: 9px; font-weight: 900; letter-spacing: 1px; color: var(--wood-darker); }
+.level-badge strong { font-size: 28px; line-height: 26px; font-weight: 900; color: var(--wood-darker); }
+
+.level-info { flex: 1; min-width: 0; }
+.level-info p { margin: 4px 0 0; font-size: 12px; font-weight: 700; }
+
+.xp-bar {
+    height: 14px;
+    border: 2px solid var(--wood-darker);
+    border-radius: 3px;
+    background: #3d2410;
+    overflow: hidden;
+}
+
+#xp-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(180deg, #9cf28c, var(--green) 55%, var(--green-dark));
+    transition: width 0.4s;
+}
+
+/* Carteira */
+.wallet { display: flex; align-items: center; gap: 12px; }
+.wallet small { display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.wallet strong { font-size: 20px; font-weight: 900; }
+
+.coin {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 55%, #b9821f);
+    border: 3px solid #7a4f10;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.coin::after {
+    content: '$';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 15px;
+    color: #7a4f10;
+}
+
+/* Zonas */
+.zones { flex: 1; min-height: 0; overflow: auto; }
+.zones h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); }
+#zone-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+
+#zone-list li {
+    padding: 4px 8px;
+    border-radius: 5px;
+    background: var(--paper-2);
+    border: 2px solid var(--paper-3);
+}
+
+#zone-list li.locked { opacity: 0.6; }
+
+.zone-top { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; }
+.zone-top .name { flex: 1; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--wood-mid);
+    color: #fff4d9;
+    white-space: nowrap;
+}
+
+.chip.ok { background: var(--green-dark); }
+.chip.lock { background: #8c7a64; }
+.chip svg { width: 11px; height: 11px; }
+
+.zone-fish { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 1px; align-items: center; }
+.zone-fish img { width: 24px; height: 18px; object-fit: contain; }
+.zone-fish small { font-size: 10px; font-weight: 700; color: var(--ink-soft); margin-left: 3px; }
+
+/* ---------- Abas ---------- */
+.shop-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    border: 3px solid var(--wood-dark);
+    border-radius: 6px;
+    box-shadow: inset 0 -3px 0 var(--paper-3);
+    overflow: hidden;
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 8px 0;
+    background: var(--paper-3);
+    border-bottom: 3px solid var(--wood-dark);
+}
+
+.tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border: 3px solid var(--wood-dark);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: var(--wood-light);
+    color: var(--wood-darker);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-bottom: -3px;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.tab span svg { width: 18px; height: 18px; display: block; }
+.tab:hover { filter: brightness(1.06); }
+
+.tab.active {
+    background: var(--paper);
+    padding-bottom: 11px;
+    z-index: 1;
+}
+
+.badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+    border: 2px solid var(--wood-darker);
+}
+
+#shop .hidden { display: none !important; }
+
+/* ---------- Lista ---------- */
+.list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list::-webkit-scrollbar { width: 10px; }
+.list::-webkit-scrollbar-track { background: var(--paper-2); }
+.list::-webkit-scrollbar-thumb { background: var(--wood-mid); border-radius: 5px; border: 2px solid var(--paper-2); }
+
+.empty {
+    margin: auto;
+    text-align: center;
+    color: var(--ink-soft);
+    font-weight: 700;
+}
+
+.card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #fff1d2;
+    border: 3px solid var(--paper-3);
+    border-radius: 7px;
+    box-shadow: 0 3px 0 var(--paper-3);
+    transition: transform 0.08s, border-color 0.1s;
+}
+
+.card:hover { border-color: var(--wood-light); }
+.card.dim { opacity: 0.55; }
+
+.slot {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    background: radial-gradient(circle, #fbe9c4, #e9c88d);
+    border: 3px solid var(--wood-mid);
+    box-shadow: inset 0 0 0 2px #fff1d2;
+}
+
+.slot img { width: 52px; height: 52px; object-fit: contain; image-rendering: auto; }
+
+.card-info { flex: 1; min-width: 0; }
+.card-info h4 { margin: 0; font-size: 16px; font-weight: 900; }
+.card-info .price { font-size: 14px; font-weight: 900; color: var(--green-dark); }
+.card-info .stats { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+
+.stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--paper-2);
+    border: 2px solid var(--paper-3);
+    color: var(--ink-soft);
+}
+
+.minibar {
+    width: 7px;
+    height: 18px;
+    border: 1px solid var(--wood-darker);
+    background: #3a6dcb;
+    position: relative;
+}
+
+.minibar i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1px;
+    background: #6ee35e;
+}
+
+.card-actions { display: flex; align-items: center; gap: 8px; }
+
+.stepper {
+    display: flex;
+    align-items: center;
+    border: 3px solid var(--wood-dark);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff4d9;
+}
+
+.stepper button {
+    width: 28px;
+    height: 30px;
+    border: none;
+    background: var(--wood-light);
+    color: var(--wood-darker);
+    font: inherit;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.stepper button:hover { background: var(--gold); }
+
+.stepper input {
+    width: 44px;
+    height: 30px;
+    border: none;
+    border-left: 2px solid var(--wood-dark);
+    border-right: 2px solid var(--wood-dark);
+    background: #fff4d9;
+    color: var(--ink);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 900;
+    text-align: center;
+    outline: none;
+}
+
+.stepper input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.btn {
+    min-width: 116px;
+    height: 36px;
+    padding: 0 12px;
+    border: 3px solid var(--wood-darker);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.25);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+    white-space: nowrap;
+}
+
+.btn.green { background: var(--green); }
+.btn.blue { background: var(--blue); }
+.btn.big { height: 44px; font-size: 16px; min-width: 170px; }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.22); }
+.btn:disabled { background: #a89a86; cursor: not-allowed; text-shadow: none; }
+.btn.loading { pointer-events: none; filter: saturate(0.6); }
+
+.lock-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #8c7a64;
+    color: #fff4d9;
+    font-size: 13px;
+    font-weight: 900;
+    border: 3px solid var(--wood-dark);
+}
+
+.lock-tag svg { width: 14px; height: 14px; }
+
+.card.locked .slot img { filter: grayscale(1) brightness(0.8); }
+.card.locked .card-info { opacity: 0.7; }
+
+.owned {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 900;
+    background: var(--wood-mid);
+    color: #fff4d9;
+    vertical-align: middle;
+}
+
+/* ---------- Rodapé de venda ---------- */
+.sell-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--paper-2);
+    border-top: 3px solid var(--wood-dark);
+}
+
+.sell-footer small { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+.sell-footer strong { font-size: 22px; font-weight: 900; color: var(--green-dark); }
+
+/* ---------- Aviso ---------- */
+.toast {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translate(-50%, 20px);
+    padding: 10px 18px;
+    border-radius: 7px;
+    border: 3px solid var(--wood-darker);
+    background: var(--paper);
+    font-weight: 900;
+    font-size: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.ok { background: #c9f2b6; }
+.toast.err { background: #f7c2b8; }
+
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.card.pop { animation: pop 0.25s; }

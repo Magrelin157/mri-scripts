@@ -2,10 +2,12 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>lunar_fishing minigame</title>
+    <title>lunar_fishing</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shop.css">
 </head>
 <body>
+    <!-- Minigame de pesca -->
     <div id="minigame" class="hidden">
         <canvas id="game" width="46" height="164"></canvas>
         <div id="result"></div>
@@ -21,6 +23,73 @@
             <span class="label small">pra subir a barra verde</span>
         </div>
     </div>
+
+    <!-- Painel do pescador -->
+    <div id="shop-wrap" class="hidden">
+        <div id="shop">
+            <header class="shop-header">
+                <div class="shop-title">
+                    <span class="npc-icon" data-icon="fish"></span>
+                    <div>
+                        <h1 id="shop-title">Corporação Marítima</h1>
+                        <p id="shop-npc">João · Pescador</p>
+                    </div>
+                </div>
+                <button class="shop-close" id="shop-close" title="Fechar (ESC)">✕</button>
+            </header>
+
+            <div class="shop-body">
+                <aside class="shop-side">
+                    <section class="side-card level-card">
+                        <div class="level-badge">
+                            <small>NÍVEL</small>
+                            <strong id="lvl-num">0</strong>
+                        </div>
+                        <div class="level-info">
+                            <div class="xp-bar"><div id="xp-fill"></div></div>
+                            <p id="xp-text">0 / 10 XP</p>
+                            <p id="xp-next" class="muted"></p>
+                        </div>
+                    </section>
+
+                    <section class="side-card wallet">
+                        <span class="coin"></span>
+                        <div>
+                            <small id="wallet-label">Dinheiro na mão</small>
+                            <strong id="wallet-money">R$ 0</strong>
+                        </div>
+                    </section>
+
+                    <section class="side-card zones">
+                        <h3>Zonas de pesca</h3>
+                        <ul id="zone-list"></ul>
+                    </section>
+                </aside>
+
+                <main class="shop-main">
+                    <nav class="tabs">
+                        <button class="tab active" data-tab="rods"><span data-icon="rod"></span>Varas</button>
+                        <button class="tab" data-tab="baits"><span data-icon="worm"></span>Iscas</button>
+                        <button class="tab" data-tab="sell"><span data-icon="fish"></span>Vender<b id="sell-badge" class="badge hidden">0</b></button>
+                    </nav>
+
+                    <section class="list" id="list"></section>
+
+                    <footer class="sell-footer hidden" id="sell-footer">
+                        <div>
+                            <small id="sell-summary">Você tem 0 peixes</small>
+                            <strong id="sell-total">≈ R$ 0</strong>
+                        </div>
+                        <button class="btn green big" id="sell-all">Vender tudo</button>
+                    </footer>
+                </main>
+            </div>
+
+            <div id="toast" class="toast"></div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script src="shop.js"></script>
 </body>
 </html>
